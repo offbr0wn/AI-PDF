@@ -9,6 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.817.0",
+    "@aws-sdk/s3-request-presigner": "^3.817.0",
+    "@clerk/backend": "^1.32.3",
+    "@clerk/nextjs": "^6.19.5",
+    "@inngest/agent-kit": "^0.8.0",
+    "@prisma/client": "^6.8.2",
     "@radix-ui/react-progress": "^1.1.6",
     "@radix-ui/react-scroll-area": "^1.2.8",
     "@radix-ui/react-slot": "^1.2.2",
@@ -17,23 +23,28 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "hono": "^4.7.10",
+    "inngest": "^3.37.0",
     "lucide-react": "^0.511.0",
+    "mongodb": "^6.16.0",
     "next": "15.2.4",
+    "openai": "^4.100.0",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "svix": "^1.65.0",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
-    "@eslint/eslintrc": "^3"
+    "prisma": "^6.8.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

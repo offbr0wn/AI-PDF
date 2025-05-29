@@ -77,7 +77,7 @@ export function Features() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
-                Find exactly what you're looking for with full-text search capabilities and content highlighting.
+                Find exactly what you&apos;re looking for with full-text search capabilities and content highlighting.
               </p>
             </CardContent>
           </Card>

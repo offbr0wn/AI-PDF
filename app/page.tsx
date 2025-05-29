@@ -1,10 +1,15 @@
-import { FileUpload } from "@/components/file-upload";
+"use client"
+
 import { Features } from "@/components/features";
 import { Header } from "@/components/header";
 import { Hero } from "@/components/hero";
 import { RecentDocuments } from "@/components/recent-documents";
+import { useUser } from "@clerk/nextjs";
 
 export default function Home() {
+
+  const {  user } = useUser()
+  console.log(user?.id)
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-br from-primary-50 to-white/40  relative overflow-hidden">
       {/* Decorative elements */}
