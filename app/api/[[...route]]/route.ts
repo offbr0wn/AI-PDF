@@ -11,6 +11,7 @@ import {
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { prisma } from "@/lib/db";
 
 const app = new Hono().basePath("/api");
 const s3Client = new S3Client({
@@ -66,25 +67,43 @@ app.get("AI", async (c) => {
 
 app.post("/process-pdf", async (c) => {
   try {
+   
     const formData = await c.req.formData();
-    console.log(formData);
-    const file = formData.get("file") as File;
-    const fileBuffer = await file.arrayBuffer();
-    const fileContent = Buffer.from(fileBuffer).toString("base64");
+
     //   const { pdfUrl } = await c.req.json();
     const userId = formData.get("userId") as string;
-
-    if (!fileContent) {
+    const fileURL = formData.get("fileURL") as string;
+    const fileName = formData.get("fileName") as string;
+    // const fileSizeInMB = formData.get("fileSizeInMB") as string;
+    if (!fileURL) {
       return c.json({ error: "PDF URL is required" }, 400);
     }
+
+    if (!userId) {
+      return c.json({ error: "User ID is required" }, 400);
+    }
+    console.log("-----------------------Document created-----------------------");
+
+    const document = await prisma.document.create({
+      data: {
+        user: {
+          connect: { clerkId: userId },
+        },
+        documentType: "pdf",
+        fileUrl: fileURL,
+        fileName: fileName.trim(),
+      },
+    });
+    console.log("Document created",document);
 
     // Trigger Inngest event
     const event = await inngest.send({
       name: "app/pdf",
       data: {
-        source:
-          "https://ai-pdf-saas.s3.eu-west-2.amazonaws.com/Job+Opportunities.pdf",
+        fileURL,
         userId,
+        fileName: fileName.trim(),
+        documentId: document.id,
       },
     });
 
@@ -92,7 +111,6 @@ app.post("/process-pdf", async (c) => {
       success: true,
       message: "PDF processing started",
       eventId: event.ids[0],
-      fileContent,
     });
   } catch (error) {
     console.error("PDF processing error:", error);
@@ -119,6 +137,8 @@ app.post("/upload-pdf", async (c) => {
     // Convert file to buffer
     const fileBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(fileBuffer);
+    const fileSizeInBytes = buffer.byteLength;
+    const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
 
     // Generate a unique file name
     const paidUserBucket = `Paid User Bucket/${userId}/${Date.now()}-${
@@ -149,8 +169,8 @@ app.post("/upload-pdf", async (c) => {
 
     return c.json({
       success: true,
-      // fileUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${fileName}`,
       presignedUrl,
+      fileSizeInMB,
       fileName,
     });
   } catch (error) {
@@ -165,6 +185,82 @@ app.post("/upload-pdf", async (c) => {
     );
   }
 });
+
+app.get("/user/document/:userId", async (c) => {
+  const userId = c.req.param("userId");
+  const data = await prisma.user.findUnique({
+    where: {
+      clerkId: userId ?? "",
+    },
+    include: {
+      documents: true,
+    },
+  });
+  return c.json(data);
+});
+
+app.get("/user/get-document/:documentId", async (c) => {
+  const documentId = c.req.param("documentId");
+  console.log(documentId);
+  if (!documentId) {
+    return c.json({ error: "Document ID is required" }, 400);
+  }
+  const data = await prisma.document.findUnique({
+    where: {
+      id: documentId,
+    },
+  });
+
+  return c.json(data);
+});
+
+app.get("/user/subscription-type/:userId", async (c) => {
+  const userId = c.req.param("userId");
+  const data = await prisma.user.findUnique({
+    where: {
+      clerkId: userId ?? "",
+    },
+    select: {
+      subscriptionType: true,
+    },
+  });
+
+  return c.json(data?.subscriptionType);
+});
+
+app.delete("/user/document/:userId", async (c) => {
+  const userId = c.req.param("userId");
+  const { fileId } = await c.req.json();
+
+  if (!userId) {
+    return c.json({ success: false, error: "User ID is required" }, 400);
+  }
+  const data = await prisma.user.findUnique({
+    where: {
+      clerkId: userId ?? "",
+    },
+  });
+
+  if (!data) {
+    return c.json({ success: false, message: "User not found" }, 404);
+  }
+
+  try {
+    await prisma.document.delete({
+      where: {
+        id: fileId ?? "",
+      },
+    });
+
+    return c.json({ success: true, message: "Document deleted successfully" });
+  } catch (error) {
+    return c.json(
+      { success: false, message: "Failed to delete document" + error },
+      500
+    );
+  }
+});
 export const GET = handle(app);
 export const POST = handle(app);
 export const PUT = handle(app);
+export const DELETE = handle(app);

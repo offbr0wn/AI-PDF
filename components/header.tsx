@@ -33,17 +33,12 @@ export function Header() {
             Dashboard
           </Link>
           <Link
-            href="#"
+            href="/results"
             className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
           >
             Documents
           </Link>
-          <Link
-            href="#"
-            className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
-          >
-            Templates
-          </Link>
+        
           <Link
             href="#"
             className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"

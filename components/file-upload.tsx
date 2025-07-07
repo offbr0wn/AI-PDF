@@ -9,6 +9,9 @@ import { Progress } from "@/components/ui/progress";
 import { FileUp, Check, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@clerk/nextjs";
+import { ProcessPDFMutation, UploadS3Mutation } from "@/hooks/tanstack-hooks";
+import { useRouter } from "next/navigation";
+
 
 type UploadStatus = "idle" | "uploading" | "success" | "error" | "processing";
 
@@ -17,6 +20,10 @@ export function FileUpload() {
   const [progress, setProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
   const { userId } = useAuth();
+  const { mutateAsync: uploadToS3 } = UploadS3Mutation();
+  const { mutate: processPDF } = ProcessPDFMutation();
+  const router = useRouter();
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -45,30 +52,20 @@ export function FileUpload() {
   };
 
   const handleFiles = async (files: FileList) => {
-    // Simulate file upload
-    console.log("Uploading file...", files[0]);
+    // File Upload to S3 Bucket
     const formData = new FormData();
     formData.append("file", files[0]);
     formData.append("userId", userId ?? "");
-    // const response = await fetch("/api/process-pdf", {
-    //   method: "POST",
-    //   // headers: {
-    //   //   "Content-Type": "multipart/form-data",
-    //   // },
-    //   body: formData,
-    // });
+    const uploadData = await uploadToS3(formData);
 
-    const res = await fetch("/api/upload-pdf", {
-      method: "POST",
-      body: formData,
-    });
-    if (res.ok) {
-      const data = await res.json();
-
-      console.log(data);
-      setUploadStatus("uploading");
+    if (uploadData.success) {
+      formData.append("fileURL", uploadData.presignedUrl);
+      formData.append("fileSizeInMB", uploadData.fileSizeInMB);
+      formData.append("fileName", files[0].name);
+      processPDF(formData);
+      router.push("/results");
+      setUploadStatus("success");
     }
-
 
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -86,6 +83,8 @@ export function FileUpload() {
         return prev + 5;
       });
     }, 100);
+
+    return () => clearInterval(interval);
   };
 
   const resetUpload = () => {

@@ -6,17 +6,28 @@ export const pdfParserFunction = inngest.createFunction(
   { id: "pdf-parser-function" },
   { event: "app/pdf" },
   async ({ event }) => {
-    // Extract PDF text from event data
-    const { userId } = event.data;
+    const { data } = event;
+
     const result = await agentNetwork.run(
-      `Parse this PDF document  ${event.data.source} and this is the userId: ${userId}`
+      `
+      Analyze the document provided and extract its contents based on the detected document type.
+
+      **Input Data:**
+      - fileUrl: ${data.fileURL}
+      - userId: ${data.userId}
+      - documentId: ${data.documentId}
+     
+     
+
+      **Task:**
+      1.  **Detect Document Type:** Classify the document as "invoice", "receipt", "resume", "flight_ticket", or "other".
+      2.  **Extract Content:** Use the appropriate schema to extract the data.
+      3.  **Save to Database:** Call the saveToDatabase tool with the structured data.
+      `
     );
 
-    const pdfAgent = result?.state.results[0].output[0];
-    const dbAgent = result?.state;
     return {
-      pdfAgent,
-      dbAgent,
+      result,
     };
   }
 );

@@ -121,7 +121,7 @@ export function DocumentViewer({ document, status }: DocumentViewerProps) {
     if (newHighlights.length > 0) {
       newHighlights[0].scrollIntoView({ behavior: "smooth", block: "center" })
     }
-  }, [searchQuery])
+  }, [searchQuery, document])
 
   // Navigate between search matches
   const navigateMatches = (direction: "next" | "prev") => {
@@ -234,7 +234,7 @@ export function DocumentViewer({ document, status }: DocumentViewerProps) {
             </div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Processing Document</h2>
             <p className="text-slate-600 dark:text-slate-300 max-w-md mb-6">
-              We're currently extracting and analyzing the content from your document. This should only take a moment.
+              We&apos;re currently extracting and analyzing the content from your document. This should only take a moment.
             </p>
             <div className="w-full max-w-md mb-2">
               <Progress value={progress} className="h-2" />
@@ -382,7 +382,7 @@ export function DocumentViewer({ document, status }: DocumentViewerProps) {
                       <Table className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
                       <h3 className="text-lg font-medium text-slate-900 dark:text-white">No tables found</h3>
                       <p className="text-slate-500 dark:text-slate-400 mt-1 max-w-md">
-                        This document doesn't contain any tables or they couldn't be extracted.
+                        This document doesn&apos;t contain any tables or they couldn&apos;t be extracted.
                       </p>
                     </div>
                   )}
@@ -421,7 +421,7 @@ export function DocumentViewer({ document, status }: DocumentViewerProps) {
                       <List className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
                       <h3 className="text-lg font-medium text-slate-900 dark:text-white">No forms found</h3>
                       <p className="text-slate-500 dark:text-slate-400 mt-1 max-w-md">
-                        This document doesn't contain any forms or they couldn't be extracted.
+                        This document doesn&apos;t contain any forms or they couldn&apos;t be extracted.
                       </p>
                     </div>
                   )}

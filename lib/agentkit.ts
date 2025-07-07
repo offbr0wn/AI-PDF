@@ -1,20 +1,21 @@
 // import { dbAgent } from "@/inngest/agents/dbAgent";
 import { dbAgent } from "@/inngest/agents/dbAgent";
-import { pdfParserAgent } from "@/inngest/agents/pdfAgent";
+
+import { pdfAgent } from "@/inngest/agents/pdfAgent";
 import { createNetwork, openai } from "@inngest/agent-kit";
 // import { createServer } from "@inngest/agent-kit/server";
 
 export const agentNetwork = createNetwork({
   name: "Agent Network",
-  agents: [pdfParserAgent, dbAgent],
+  agents: [pdfAgent, dbAgent],
   defaultModel: openai({
-    model: "google/gemma-3-27b-it:free",
+    model: "google/gemini-2.0-flash-001",
     apiKey: process.env.OPEN_ROUTER_API_KEY!,
     baseUrl: "https://openrouter.ai/api/v1",
   }),
   router: ({ callCount }) => {
     if (callCount === 0) {
-      return pdfParserAgent;
+      return pdfAgent;
     }
     if (callCount === 1) {
       return dbAgent;
@@ -23,4 +24,3 @@ export const agentNetwork = createNetwork({
     return undefined;
   },
 });
-

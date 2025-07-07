@@ -9,24 +9,35 @@ generator client {
 }
 
 model User {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  clerkId       String    @unique
-  email         String    @unique
-  firstName     String?
-  lastName      String?  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  documents     Document[]
+  id               String     @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId          String     @unique
+  email            String     @unique
+  firstName        String?
+  lastName         String?
+  subscriptionType String     @default("free")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  documents        Document[]
 }
 
 model Document {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String    @db.ObjectId
-  user        User      @relation(fields: [userId], references: [id])
-  name        String?
-  content     String?
-  type        String?
-  status      String    @default("processing")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId      String
+  user         User     @relation(fields: [clerkId], references: [clerkId])
+  documentType String
+  fileName     String
+  content      Json?
+  metadata     Json?
+  fileUrl      String
+  type         String?
+  status       String   @default("processing")
+  summary      String?
+  keywords     String[]
+  notes        String?
+  sizeMB       String?
+  pages        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([clerkId], name: "clerkId")
 }
